@@ -15,9 +15,9 @@ return new class extends Migration
             $table->uuid('id')->primary(); // UUID as primary key
             $table->string('name');
             $table->text('note')->nullable();
-            $table->string('status');
+            $table->string('status')->default(\App\Enum\TestFollowUp::NEW);
             $table->boolean('is_paid')->default(false);
-            $table->foreignUuid('doctor_id')->constrained('users')->nullOnDelete();
+            $table->foreignid('doctor_id')->constrained('users')->nullOnDelete();
             $table->foreignUuid('patient_id')->constrained('patients')->nullOnDelete();
             $table->timestamps();
         });

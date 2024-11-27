@@ -2,24 +2,41 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class TestRequest extends Model
 {
+    use HasUuids;
     protected $fillable = [
         'name', 'note', 'status', 'is_paid', 'doctor_id', 'patient_id',
     ];
 
-    public function doctor(): HasOne
+    public function doctorInfo(): HasOne
     {
-        return $this->hasOne(User::class, 'id', 'doctor_id');
+        if ( Auth()->user()->role == 'doctor' ) {
+            return $this->hasOne(User::class)->where(['id' => Auth()->user()->getAuthIdentifier()]);
+        }
+        return $this->hasOne(User::class)->where(['role' => 'doctor']);
+    }
+
+    public function doctorPatients(): HasOne
+    {
+        if (Auth()->user()->role == 'doctor') {
+            return $this->hasOne(Patient::class)->where(['created_by' => Auth()->user()->getAuthIdentifier()]);
+        }
+        return $this->hasOne(Patient::class);
     }
 
     public function patient(): BelongsTo
     {
-        return $this->belongsTo(Patient::class, 'id', 'patient_id');
+        return $this->belongsTo(Patient::class, 'patient_id');
     }
 
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'doctor_id')->where('role', 'doctor');
+    }
 }
