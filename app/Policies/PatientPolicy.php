@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
+use App\Enum\Role;
 use App\Models\Patient;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class PatientPolicy
 {
@@ -13,7 +13,11 @@ class PatientPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        if (! in_array($user->role, [Role::GENETICIST->value])) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -21,7 +25,7 @@ class PatientPolicy
      */
     public function view(User $user, Patient $patient): bool
     {
-        if (in_array($user->role, ['admin', 'moderator'])) {
+        if (in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value])) {
             return true;
         }
 
@@ -37,7 +41,11 @@ class PatientPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        if (! in_array($user->role, [Role::GENETICIST->value])) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -45,7 +53,7 @@ class PatientPolicy
      */
     public function update(User $user, Patient $patient): bool
     {
-        if (in_array($user->role, ['admin', 'moderator'])) {
+        if (in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value])) {
             return true;
         }
 
@@ -57,7 +65,7 @@ class PatientPolicy
      */
     public function delete(User $user, Patient $patient): bool
     {
-        if (in_array($user->role, ['admin'])) {
+        if (in_array($user->role, [Role::ADMIN->value])) {
             return true;
         }
 
@@ -77,7 +85,7 @@ class PatientPolicy
      */
     public function forceDelete(User $user, Patient $patient): bool
     {
-        if (in_array($user->role, ['admin'])) {
+        if (in_array($user->role, [Role::ADMIN->value])) {
             return true;
         }
 

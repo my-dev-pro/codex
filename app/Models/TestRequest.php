@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class TestRequest extends Model
@@ -38,5 +39,15 @@ class TestRequest extends Model
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'doctor_id')->where('role', 'doctor');
+    }
+
+    public function results(): HasOne
+    {
+        return $this->hasOne(TestResult::class, 'test_id', 'id');
+    }
+
+    public function notifications(): HasOne
+    {
+        return $this->hasOne(Notification::class, 'test_id', 'id');
     }
 }

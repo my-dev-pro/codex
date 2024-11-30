@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enum\Gender;
 use App\Enum\Nationlity;
+use App\Enum\Role;
 use App\Filament\Resources\PatientResource\Pages;
 use App\Filament\Resources\PatientResource\RelationManagers;
 use App\Models\Patient;
@@ -18,7 +19,7 @@ class PatientResource extends Resource
 {
     protected static ?string $model = Patient::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-s-user';
 
     public static function form(Form $form): Form
     {
@@ -56,7 +57,7 @@ class PatientResource extends Resource
                                 Forms\Components\Select::make('created_by')
                                     ->relationship('doctor', 'name')
                                     ->searchable()
-                                    ->visible(fn () => in_array(Auth()->user()->role, ['admin', 'moderator'])) // role
+                                    ->visible(fn () => in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value])) // role
                                     ->required(),
                             ])
                             ->columns(3),
@@ -131,7 +132,7 @@ class PatientResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ])
-                ->visible(in_array(Auth()->user()->role, ['admin'])),
+                ->visible(in_array(Auth()->user()->role, [Role::ADMIN->value])),
             ]);
 
     }
@@ -155,7 +156,7 @@ class PatientResource extends Resource
     // show patients of current doctor
     public static function getEloquentQuery(): Builder
     {
-        if (in_array(Auth()->user()->role, ['admin', 'moderator'])) {
+        if (in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value])) {
             return parent::getEloquentQuery();
         }
         return parent::getEloquentQuery()->where('created_by', Auth()->user()->getAuthIdentifier());

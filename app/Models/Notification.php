@@ -11,6 +11,10 @@ class Notification extends Model
         'receiver', 'is_sent', 'test_id',
     ];
 
+    protected $casts = [
+        'receiver' => 'array',
+    ];
+
     public function test(): BelongsTo
     {
         return $this->belongsTo(TestRequest::class , 'test_id');

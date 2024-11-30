@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enum\Role;
 use App\Models\TestRequest;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
@@ -21,11 +22,8 @@ class TestRequestPolicy
      */
     public function view(User $user, TestRequest $testRequest): bool
     {
-        if (in_array($user->role, ['admin', 'moderator', 'geneticist'])) {
-            return true;
-        }
-
-        return true;
+        return in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::GENETICIST->value, Role::DOCTOR->value])
+            ?? false;
     }
 
     /**
@@ -33,7 +31,8 @@ class TestRequestPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::DOCTOR->value])
+            ?? false;
     }
 
     /**
@@ -41,11 +40,8 @@ class TestRequestPolicy
      */
     public function update(User $user, TestRequest $testRequest): bool
     {
-        if (in_array($user->role, ['admin', 'moderator', 'geneticist'])) {
-            return true;
-        }
-
-        return false;
+        return in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::GENETICIST->value])
+            ?? false;
     }
 
     /**
@@ -53,11 +49,8 @@ class TestRequestPolicy
      */
     public function delete(User $user, TestRequest $testRequest): bool
     {
-        if (in_array($user->role, ['admin', 'moderator', 'geneticist'])) {
-            return true;
-        }
-
-        return false;
+        return in_array($user->role, [Role::ADMIN->value])
+            ?? false;
     }
 
     /**
@@ -65,7 +58,7 @@ class TestRequestPolicy
      */
     public function restore(User $user, TestRequest $testRequest): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -73,10 +66,7 @@ class TestRequestPolicy
      */
     public function forceDelete(User $user, TestRequest $testRequest): bool
     {
-        if (in_array($user->role, ['admin', 'moderator', 'geneticist'])) {
-            return true;
-        }
-
-        return false;
+        return in_array($user->role, [Role::ADMIN->value])
+            ?? false;
     }
 }

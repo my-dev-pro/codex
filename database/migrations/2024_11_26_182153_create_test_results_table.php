@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('test_results', function (Blueprint $table) {
             $table->uuid('id')->primary(); // UUID as primary key
-            $table->string('result_path');
+            $table->string('result_path')->nullable();
             $table->text('note')->nullable();
             $table->foreignUuid('test_id')->constrained('test_requests')->cascadeOnDelete();
             $table->timestamps();
