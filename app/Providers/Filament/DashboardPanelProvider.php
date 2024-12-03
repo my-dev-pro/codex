@@ -39,6 +39,9 @@ class DashboardPanelProvider extends PanelProvider
             ->widgets([
 //                Widgets\AccountWidget::class,
             ])
+            ->renderHook(
+                'panels::body.end', fn() => view('layouts.filament-custom'), // running custom footer
+            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
