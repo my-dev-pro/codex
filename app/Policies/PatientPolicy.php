@@ -13,10 +13,6 @@ class PatientPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (! in_array($user->role, [Role::GENETICIST->value])) {
-            return true;
-        }
-
         return false;
     }
 

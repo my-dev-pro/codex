@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Enum\Gender;
+use App\Enum\Nationlity;
 use App\Enum\Role;
 use App\Enum\Test;
 use App\Enum\TestFollowUp;
@@ -9,7 +11,6 @@ use App\Filament\Resources\TestRequestResource\Pages;
 use App\Filament\Resources\TestRequestResource\RelationManagers;
 use App\Models\Patient;
 use App\Models\TestRequest;
-use App\Models\TestResult;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Split;
@@ -20,7 +21,6 @@ use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class TestRequestResource extends Resource
@@ -61,6 +61,68 @@ class TestRequestResource extends Resource
                                         return [$patient->id => $patient->first_name . ' ' . $patient->middle_name . ' ' . $patient->last_name];
                                     });
                             })
+                            ->createOptionForm([
+                                Forms\Components\Fieldset::make('Patient Name')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('first_name')
+                                            ->required(),
+                                        Forms\Components\TextInput::make('middle_name'),
+                                        Forms\Components\TextInput::make('last_name')
+                                            ->required(),
+                                    ])
+                                    ->columns(3),
+
+                                Forms\Components\Fieldset::make('Metadata')
+                                    ->schema([
+                                        Forms\Components\Select::make('nationality')
+                                            ->options(Nationlity::class)
+                                            ->default('Egyptian'),
+                                        Forms\Components\TextInput::make('national_id')
+                                            ->label('National ID')
+                                            ->required(),
+                                        Forms\Components\Section::make('Others')
+                                            ->schema([
+                                                Forms\Components\Select::make('gender')
+                                                    ->options(Gender::class)
+                                                    ->searchable()
+                                                    ->required(),
+
+                                                Forms\Components\DatePicker::make('date_of_birth')
+                                                    ->maxDate(now())
+                                                    ->required(),
+
+                                                Forms\Components\Select::make('created_by')
+                                                    ->label('Doctor Name')
+                                                    ->options(
+                                                        User::where('role', Role::DOCTOR->value)
+                                                        ->pluck('name', 'id')
+                                                    )
+                                                    ->native(false)
+                                                    ->searchable()
+                                                    ->visible(fn () => in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value])) // role
+                                                    ->required(),
+                                            ])
+                                            ->columns(3),
+                                    ])
+                                    ->columns(2),
+
+                                Forms\Components\Fieldset::make('Contact Information')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('telephone')
+                                            ->tel(),
+                                        Forms\Components\TextInput::make('mobile'),
+                                        Forms\Components\TextInput::make('email')
+                                            ->email(),
+                                        Forms\Components\Textarea::make('address')
+                                            ->columnSpanFull(),
+                                    ])
+                                    ->columns(3),
+                            ])
+                            ->createOptionUsing(function ($data) {
+                                // Create a new patient record using the form data
+                                $patient = Patient::create($data);
+                                return $patient->id; // Return the ID of the newly created patient
+                            })
                             ->searchable(['first_name', 'middle_name', 'last_name','mobile', 'telephone', 'email', 'national_id'])
                             ->required(),
 
@@ -92,11 +154,12 @@ class TestRequestResource extends Resource
                                 ->onColor('success')
                                 ->offIcon('heroicon-s-exclamation-triangle')
                                 ->inline(false)
+                                ->visible(fn () =>  in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value] )) // roles
                                 ->required(),
                         ]),
 
                     ])
-                        ->visible(fn () =>  in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value])) // roles
+                        ->visible(fn () =>  in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::GENETICIST->value] )) // roles
                         ->aside(),
 
                 ])->columnSpanFull(),
@@ -132,19 +195,7 @@ class TestRequestResource extends Resource
                 Tables\Columns\TextColumn::make('id')
                     ->label('Test ID')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->badge()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('doctor_id')
-                    ->label('Doctor Name')
-                    ->getStateUsing(function ($record) {
-                        return implode(' ', array_filter([
-                            $record->doctor->name,
-                        ]));
-                    })
-                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('patient_id')
                     ->label('Patient Name')
                     ->getStateUsing(function ($record) {
@@ -155,6 +206,25 @@ class TestRequestResource extends Resource
                         ]));
                     })
                     ->searchable(),
+
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Test Name')
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('doctor_id')
+                    ->label('Doctor Name')
+                    ->getStateUsing(function ($record) {
+                        return implode(' ', array_filter([
+                            $record->doctor->name,
+                        ]));
+                    })
+                    ->searchable(),
+
+
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
