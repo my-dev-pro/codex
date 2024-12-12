@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('test_requests', function (Blueprint $table) {
             $table->uuid('id')->primary(); // UUID as primary key
+            $table->string('test_type')->nullable();
             $table->string('name');
             $table->text('note')->nullable();
             $table->string('status')->default(\App\Enum\TestFollowUp::NEW);
