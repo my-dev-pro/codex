@@ -2,9 +2,21 @@
 
 namespace App\Enum;
 
-enum Test : string
+use Filament\Support\Contracts\HasLabel;
+
+enum Test : string implements HasLabel
 {
-    case TEST_ONE = 'Test One';
-    case TEST_TWO = 'Test Two';
-    case TEST_THREE = 'Test Three';
+    case CODEX_PRO = 'CodexPro';
+    case CODEXI = 'Codexi';
+    case PFIZER_CODEXI = 'Pfizer and Codexi';
+    case CODEX_LIQUID = 'Codex Liquid';
+    case EXOM = 'Whole Exom Sequencing';
+    case MMR = 'MMR';
+    case MSI = 'MSI';
+    case SINGLE_GENE = 'Single Gene';
+
+    public function getLabel(): ?string
+    {
+        return $this->value;
+    }
 }
