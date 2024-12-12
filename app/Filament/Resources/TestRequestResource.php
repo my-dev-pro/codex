@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enum\Gender;
 use App\Enum\Nationlity;
 use App\Enum\Role;
+use App\Enum\SponsoredTest;
 use App\Enum\Test;
 use App\Enum\TestFollowUp;
 use App\Filament\Resources\TestRequestResource\Pages;
@@ -21,6 +22,7 @@ use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsEnumArrayObject;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class TestRequestResource extends Resource
@@ -35,9 +37,27 @@ class TestRequestResource extends Resource
             ->schema([
                 Split::make([
                     Forms\Components\Section::make([
+                        Forms\Components\Select::make('test_type')
+                            ->label('Test Type')
+                            ->options([
+                                'private' => 'Private',
+                                'sponsored' => 'Sponsored',
+                            ])
+                            ->inlineLabel()
+                            ->columns(2)
+                            ->live()
+                            ->required(),
+
                         Forms\Components\Select::make('name')
                             ->label('Test Name')
-                            ->options(Test::class)
+                            ->options(function (Get $get) {
+                                $test_type = $get('test_type');
+                                return match($test_type) {
+                                    'private' => Test::class,
+                                    'sponsored' => SponsoredTest::class,
+                                    default => [],
+                                };
+                            })
                             ->searchable()
                             ->required(),
 
@@ -149,14 +169,38 @@ class TestRequestResource extends Resource
                                 ->searchable()
                                 ->required(),
 
-                            Forms\Components\Toggle::make('is_paid')
-                                ->onIcon('heroicon-s-banknotes')
-                                ->onColor('success')
-                                ->offIcon('heroicon-s-exclamation-triangle')
-                                ->inline(false)
+                            Forms\Components\ToggleButtons::make('is_paid')
+                                ->label('Paid')
+                                ->boolean()
+                                ->inline()
+                                ->default(false)
+                                ->grouped()
                                 ->visible(fn () =>  in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value] )) // roles
                                 ->required(),
                         ]),
+
+
+                        Forms\Components\Section::make('Test Results')
+                            ->relationship('results')
+                            ->schema([
+                                Forms\Components\FileUpload::make('result_path')
+                                    ->label('Result Report')
+                                    ->acceptedFileTypes(['application/pdf'])
+                                    ->disk('local')
+                                    ->visibility('private')
+                                    ->getUploadedFileNameForStorageUsing(
+                                        fn (TemporaryUploadedFile $file, $record): string => (string) str($file->storeAs('results', $record->test_id . '.pdf')),
+                                    )
+                                    ->downloadable()
+                                    ->deletable(fn() => in_array(Auth()->user()->role, [Role::ADMIN->value, Role::GENETICIST->value]))
+                                    ->openable(),
+
+                                Forms\Components\Textarea::make('note')
+                                    ->label('Result Report Note')
+                                    ->helperText('This note is visible by doctors and moderators.')
+                                    ->columnSpanFull(),
+                            ])
+                            ->visible( in_array(Auth()->user()->role, [Role::ADMIN->value, Role::GENETICIST->value, Role::DOCTOR->value]) ),
 
                     ])
                         ->visible(fn () =>  in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::GENETICIST->value] )) // roles
@@ -164,27 +208,6 @@ class TestRequestResource extends Resource
 
                 ])->columnSpanFull(),
 
-                Forms\Components\Section::make('Test Results')
-                    ->relationship('results')
-                    ->schema([
-                        Forms\Components\FileUpload::make('result_path')
-                            ->label('Result Report')
-                            ->acceptedFileTypes(['application/pdf'])
-                            ->disk('local')
-                            ->visibility('private')
-                            ->getUploadedFileNameForStorageUsing(
-                                fn (TemporaryUploadedFile $file, $record): string => (string) str($file->storeAs('results', $record->test_id . '.pdf')),
-                            )
-                            ->downloadable()
-                            ->deletable(fn() => in_array(Auth()->user()->role, [Role::ADMIN->value, Role::GENETICIST->value]))
-                            ->openable(),
-
-                        Forms\Components\Textarea::make('note')
-                            ->label('Result Report Note')
-                            ->helperText('This note is visible by doctors and moderators.')
-                            ->columnSpanFull(),
-                    ])
-                    ->visible( in_array(Auth()->user()->role, [Role::ADMIN->value, Role::GENETICIST->value, Role::DOCTOR->value]) ),
             ]);
     }
 
@@ -244,7 +267,8 @@ class TestRequestResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                    ->requiresConfirmation(),
                 ])
                     ->visible(in_array(Auth()->user()->role, [Role::ADMIN->value,])),
             ]);

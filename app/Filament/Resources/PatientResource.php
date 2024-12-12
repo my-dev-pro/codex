@@ -130,7 +130,8 @@ class PatientResource extends Resource
 
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                    ->requiresConfirmation(),
                 ])
                 ->visible(in_array(Auth()->user()->role, [Role::ADMIN->value])),
             ]);
