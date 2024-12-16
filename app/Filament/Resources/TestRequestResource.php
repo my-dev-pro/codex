@@ -22,7 +22,6 @@ use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\AsEnumArrayObject;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class TestRequestResource extends Resource
@@ -65,7 +64,7 @@ class TestRequestResource extends Resource
                             ->label('Doctor Name')
                             ->relationship('doctorInfo', 'name')
                             ->native(false)
-                            ->searchable()
+                            ->searchable(['name', 'mobile'])
                             ->default(in_array(Auth()->user()->role, ['doctor']) ? Auth()->user()->getAuthIdentifier() : '')
                             ->disabled(in_array(Auth()->user()->role, ['doctor']))
                             ->live()
