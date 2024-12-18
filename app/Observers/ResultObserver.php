@@ -2,9 +2,9 @@
 
 namespace App\Observers;
 
-use App\Models\TestRequest;
 use App\Models\TestResult;
-use Illuminate\Support\Facades\Log;
+use App\Services\Whatsapp\Irsl;
+use Illuminate\Support\Facades\Storage;
 
 class ResultObserver
 {
@@ -22,15 +22,30 @@ class ResultObserver
     public function updated(TestResult $testResult): void
     {
         $patient = $testResult->test->patient;
-        $doctor = $testResult->test->doctor;
+//        $doctor = $testResult->test->doctor;
         $notification = $testResult->test->notifications;
+        $file_path = $testResult->result_path;
 
-        if ($testResult->result_path != null) {
+        if ($file_path != null) {
+
+            $file_url = config('app.url') . Storage::url($file_path);
+
             if (! empty($notification->receiver)) {
+                $whatsapp = new Irsl();
                 foreach ($notification->receiver as $receiver) {
-                    // check if whatsapp account
-                    // sent whatsapp message
-                    Log::info('Whatsapp message sent to ' . $testResult->test->{$receiver}->mobile);
+
+                    // receiver mobile number
+                    $number = $testResult->test->{$receiver}->mobile;
+                    $message = "Hello, {$patient->first_name} {$patient->last_name} test result has been released. Thank you for using Codex services";
+
+                    // check if whatsapp account is valid
+                    if ( $whatsapp->getConnectionStatus() && $whatsapp->isValidNumber($number) ) {
+
+                        // send WhatsApp message
+                        $whatsapp->sendMessage($number, $message, $file_url);
+
+                    }
+
                 }
             }
         }
