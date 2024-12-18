@@ -18,8 +18,8 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->string('status')->default(\App\Enum\TestFollowUp::NEW);
             $table->boolean('is_paid')->default(false);
-            $table->foreignid('doctor_id')->constrained('users')->nullOnDelete();
-            $table->foreignUuid('patient_id')->constrained('patients')->nullOnDelete();
+            $table->foreignid('doctor_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('patient_id')->nullable()->constrained('patients')->nullOnDelete();
             $table->timestamps();
         });
     }

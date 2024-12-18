@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary(); // UUID as primary key
             $table->string('result_path')->nullable();
             $table->text('note')->nullable();
-            $table->foreignUuid('test_id')->constrained('test_requests')->cascadeOnDelete();
+            $table->foreignUuid('test_id')->nullable()->constrained('test_requests')->cascadeOnDelete();
             $table->timestamps();
         });
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id(); // UUID as primary key
             $table->json('receiver');
             $table->boolean('is_sent')->default(false);
-            $table->foreignUuid('test_id')->constrained('test_requests')->cascadeOnDelete();
+            $table->foreignUuid('test_id')->nullable()->constrained('test_requests')->cascadeOnDelete();
             $table->timestamps();
         });
     }
