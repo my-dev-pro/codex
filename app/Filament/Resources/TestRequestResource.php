@@ -154,6 +154,7 @@ class TestRequestResource extends Resource
                             ->schema([
                                 Forms\Components\CheckboxList::make('receiver')
                                 ->options([
+                                    'patient' => 'Patient',
                                     Role::DOCTOR->value => ucfirst(Role::DOCTOR->value),
                                 ])
                                 ->columns(2)
@@ -185,8 +186,8 @@ class TestRequestResource extends Resource
                                 Forms\Components\FileUpload::make('result_path')
                                     ->label('Result Report')
                                     ->acceptedFileTypes(['application/pdf'])
-                                    ->disk('local')
-                                    ->visibility('private')
+                                    ->disk('public')
+                                    ->visibility('public')
                                     ->getUploadedFileNameForStorageUsing(
                                         fn (TemporaryUploadedFile $file, $record): string => (string) str($file->storeAs('results', $record->test_id . '.pdf')),
                                     )
