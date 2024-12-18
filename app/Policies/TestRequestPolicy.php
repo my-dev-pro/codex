@@ -22,7 +22,7 @@ class TestRequestPolicy
      */
     public function view(User $user, TestRequest $testRequest): bool
     {
-        return in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::GENETICIST->value, Role::DOCTOR->value])
+        return in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::GENETICIST->value, Role::DOCTOR->value, Role::SUPER_MODERATOR->value,])
             ?? false;
     }
 
@@ -31,7 +31,7 @@ class TestRequestPolicy
      */
     public function create(User $user): bool
     {
-        return in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::DOCTOR->value])
+        return in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::DOCTOR->value, Role::SUPER_MODERATOR->value,])
             ?? false;
     }
 
@@ -40,7 +40,7 @@ class TestRequestPolicy
      */
     public function update(User $user, TestRequest $testRequest): bool
     {
-        return in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::GENETICIST->value])
+        return in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::GENETICIST->value, Role::SUPER_MODERATOR->value,])
             ?? false;
     }
 

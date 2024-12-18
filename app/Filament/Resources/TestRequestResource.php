@@ -77,8 +77,13 @@ class TestRequestResource extends Resource
                                 return Patient::where('created_by', $doctor)
                                     ->get()
                                     ->mapWithKeys(function (Patient $patient) {
-                                        return [$patient->id => $patient->first_name . ' ' . $patient->middle_name . ' ' . $patient->last_name];
+                                        return [$patient->id => "{$patient->first_name} {$patient->middle_name} {$patient->last_name}"];
                                     });
+                            })
+                            ->formatStateUsing(function ($state) {
+                                // Fetch the patient name from the database based on the state (patient_id)
+                                $patient = Patient::find($state);
+                                return $patient ? "{$patient->first_name} {$patient->middle_name} {$patient->last_name}" : null;
                             })
                             ->createOptionForm([
                                 Forms\Components\Fieldset::make('Patient Name')
@@ -118,7 +123,7 @@ class TestRequestResource extends Resource
                                                     )
                                                     ->native(false)
                                                     ->searchable()
-                                                    ->visible(fn () => in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value])) // role
+                                                    ->visible(fn () => in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::SUPER_MODERATOR->value,])) // role
                                                     ->required(),
                                             ])
                                             ->columns(3),
@@ -175,7 +180,7 @@ class TestRequestResource extends Resource
                                 ->inline()
                                 ->default(false)
                                 ->grouped()
-                                ->visible(fn () =>  in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value] )) // roles
+                                ->visible(fn () =>  in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::SUPER_MODERATOR->value,] )) // roles
                                 ->required(),
                         ]),
 
@@ -192,7 +197,7 @@ class TestRequestResource extends Resource
                                         fn (TemporaryUploadedFile $file, $record): string => (string) str($file->storeAs('results', $record->test_id . '.pdf')),
                                     )
                                     ->downloadable()
-                                    ->deletable(fn() => in_array(Auth()->user()->role, [Role::ADMIN->value, Role::GENETICIST->value]))
+                                    ->deletable(fn() => in_array(Auth()->user()->role, [Role::ADMIN->value, Role::GENETICIST->value, Role::SUPER_MODERATOR->value,]))
                                     ->openable(),
 
                                 Forms\Components\Textarea::make('note')
@@ -200,10 +205,10 @@ class TestRequestResource extends Resource
                                     ->helperText('This note is visible by doctors and moderators.')
                                     ->columnSpanFull(),
                             ])
-                            ->visible( in_array(Auth()->user()->role, [Role::ADMIN->value, Role::GENETICIST->value, Role::DOCTOR->value]) ),
+                            ->visible( in_array(Auth()->user()->role, [Role::ADMIN->value, Role::GENETICIST->value, Role::DOCTOR->value, Role::SUPER_MODERATOR->value,]) ),
 
                     ])
-                        ->visible(fn () =>  in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::GENETICIST->value] )) // roles
+                        ->visible(fn () =>  in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::GENETICIST->value, Role::SUPER_MODERATOR->value,] )) // roles
                         ->aside(),
 
                 ])->columnSpanFull(),
@@ -293,7 +298,7 @@ class TestRequestResource extends Resource
     // show patients of current doctor
     public static function getEloquentQuery(): Builder
     {
-        if (in_array(Auth()->user()->role, [Role::ADMIN->value,Role::MODERATOR->value, Role::GENETICIST->value])) {
+        if (in_array(Auth()->user()->role, [Role::ADMIN->value,Role::MODERATOR->value, Role::GENETICIST->value, Role::SUPER_MODERATOR->value,])) {
             return parent::getEloquentQuery();
         }
         return parent::getEloquentQuery()->where('doctor_id', Auth()->user()->getAuthIdentifier());

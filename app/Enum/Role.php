@@ -8,4 +8,5 @@ enum Role : string
     case MODERATOR = 'moderator';
     case DOCTOR = 'doctor';
     case GENETICIST = 'geneticist';
+    case SUPER_MODERATOR = 'superModerator';
 }

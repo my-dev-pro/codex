@@ -12,8 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+
 
 class UserResource extends Resource
 {
@@ -28,7 +27,9 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required(),
                 Forms\Components\Select::make('role')
-                    ->options(Role::class),
+                    ->options(Role::class)
+                    ->helperText('Super Moderator: Operate, Upload results.')
+                    ->required(),
                 Forms\Components\TextInput::make('mobile'),
                 Forms\Components\TextInput::make('email')
                     ->email()

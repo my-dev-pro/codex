@@ -57,7 +57,7 @@ class PatientResource extends Resource
                                 Forms\Components\Select::make('created_by')
                                     ->relationship('doctor', 'name')
                                     ->searchable()
-                                    ->visible(fn () => in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value])) // role
+                                    ->visible(fn () => in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::SUPER_MODERATOR->value])) // role
                                     ->required(),
                             ])
                             ->columns(3),
@@ -133,7 +133,7 @@ class PatientResource extends Resource
                     Tables\Actions\DeleteBulkAction::make()
                     ->requiresConfirmation(),
                 ])
-                ->visible(in_array(Auth()->user()->role, [Role::ADMIN->value])),
+                ->visible(in_array(Auth()->user()->role, [Role::ADMIN->value, Role::SUPER_MODERATOR->value])),
             ]);
 
     }
@@ -157,7 +157,7 @@ class PatientResource extends Resource
     // show patients of current doctor
     public static function getEloquentQuery(): Builder
     {
-        if (in_array(Auth()->user()->role, [Role::ADMIN->value, Role::MODERATOR->value])) {
+        if (in_array(Auth()->user()->role, [Role::ADMIN->value, Role::SUPER_MODERATOR->value])) {
             return parent::getEloquentQuery();
         }
         return parent::getEloquentQuery()->where('created_by', Auth()->user()->getAuthIdentifier());

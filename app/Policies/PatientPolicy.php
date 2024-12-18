@@ -13,6 +13,9 @@ class PatientPolicy
      */
     public function viewAny(User $user): bool
     {
+        if (in_array($user->role, [Role::ADMIN->value, Role::SUPER_MODERATOR->value,])) {
+            return true;
+        }
         return false;
     }
 
@@ -21,7 +24,7 @@ class PatientPolicy
      */
     public function view(User $user, Patient $patient): bool
     {
-        if (in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value])) {
+        if (in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::SUPER_MODERATOR->value,])) {
             return true;
         }
 
@@ -37,7 +40,7 @@ class PatientPolicy
      */
     public function create(User $user): bool
     {
-        if (! in_array($user->role, [Role::GENETICIST->value])) {
+        if (! in_array($user->role, [Role::GENETICIST->value, Role::SUPER_MODERATOR->value, Role::SUPER_MODERATOR->value,])) {
             return true;
         }
 
@@ -49,7 +52,7 @@ class PatientPolicy
      */
     public function update(User $user, Patient $patient): bool
     {
-        if (in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value])) {
+        if (in_array($user->role, [Role::ADMIN->value, Role::MODERATOR->value, Role::SUPER_MODERATOR->value,])) {
             return true;
         }
 
