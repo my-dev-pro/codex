@@ -5,14 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class TestRequest extends Model
 {
     use HasUuids;
     protected $fillable = [
-        'name', 'note', 'status', 'is_paid', 'doctor_id', 'patient_id',
+        'name', 'note', 'status', 'is_paid', 'doctor_id', 'patient_id', 'test_type',
     ];
 
     public function doctorInfo(): HasOne
