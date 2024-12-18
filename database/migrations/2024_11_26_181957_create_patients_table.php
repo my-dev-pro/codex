@@ -24,7 +24,7 @@ return new class extends Migration
             $table->date('date_of_birth'); // Date of birth
             $table->string('nationality')->nullable();
             $table->string('national_id', 20)->nullable(); // Unique national ID
-            $table->foreignId('created_by')->constrained('users', 'id')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users', 'id')->nullOnDelete();
             $table->timestamps();
         });
     }
