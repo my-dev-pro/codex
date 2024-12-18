@@ -26,14 +26,6 @@ class UserSeeder extends Seeder
         $handle = fopen($filePath, 'r');
         $headers = fgetcsv($handle);
 
-        DB::table('users')->insert([
-            'name' => 'Mohamed Youssef',
-            'email' => 'mydev@my-dev.pro',
-            'mobile' => '201022366794',
-            'role' => 'admin',
-            'password' => Hash::make('823w&%9^N^*fD45I*5pc'),
-        ]);
-
         while (($row = fgetcsv($handle)) !== false) {
             $data = array_combine($headers, $row);
 

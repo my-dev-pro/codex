@@ -53,7 +53,7 @@ class Irsl implements WhatsappInterface
 
         $data['recipient'] = $number;
         $data['content']['text'] = $message;
-//        $data['content']['document']['url'] = $fileUrl;
+        $data['content']['document']['url'] = $fileUrl;
 
         try {
             $response = Http::post($this->getUrl("sendMessage"), $data)->json();
